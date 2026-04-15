@@ -465,14 +465,14 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Status de Trabalho</label>
-                <select name="work_status" defaultValue={editingItem?.work_status || 'home'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+                <select name="work_status" defaultValue={editingItem?.work_status || 'home'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                   <option value="home">Em Casa / Livre</option>
                   <option value="road">Na Estrada</option>
                 </select>
               </div>
               <div>
                 <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Caminhão Fixo (Cavalo)</label>
-                <select name="truck_id" defaultValue={editingItem?.truck_id} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+                <select name="truck_id" defaultValue={editingItem?.truck_id} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                   <option value="">Nenhum</option>
                   {trucks.filter(t => t.type === 'cavalo').map(t => (
                     <option key={t.id} value={t.id}>{t.plate} - {t.model}</option>
@@ -492,7 +492,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
                   <select 
                     name="type" 
                     defaultValue={editingItem?.type || 'cavalo'} 
-                    className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm"
+                    className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm"
                     onChange={(e) => {
                       // Force re-render to show/hide category
                       setEditingItem({...editingItem, type: e.target.value});
@@ -507,7 +507,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
               {editingItem?.type === 'carreta' || (!editingItem && (document.getElementsByName('type')[0] as HTMLSelectElement)?.value === 'carreta') ? (
                 <div>
                   <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Categoria da Carreta</label>
-                  <select name="trailer_category" defaultValue={editingItem?.trailer_category || 'normal'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+                  <select name="trailer_category" defaultValue={editingItem?.trailer_category || 'normal'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                     <option value="normal">Normal</option>
                     <option value="frigorifica">Frigorífica</option>
                   </select>
@@ -520,7 +520,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
               )}
               <div>
                 <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Localização / Status</label>
-                <select name="location_status" defaultValue={editingItem?.location_status || 'yard'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+                <select name="location_status" defaultValue={editingItem?.location_status || 'yard'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                   <option value="yard">No Pátio</option>
                   <option value="road">Em Viagem</option>
                 </select>
@@ -528,7 +528,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
               {(editingItem?.type === 'carreta' || (!editingItem && (document.getElementsByName('type')[0] as HTMLSelectElement)?.value === 'carreta')) && (
                 <div>
                   <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Status de Manutenção</label>
-                  <select name="maintenance_status" defaultValue={editingItem?.maintenance_status || 'ok'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+                  <select name="maintenance_status" defaultValue={editingItem?.maintenance_status || 'ok'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                     <option value="ok">Manutenção OK ✅</option>
                     <option value="needed">Manutenção Necessária ⚠️</option>
                   </select>
