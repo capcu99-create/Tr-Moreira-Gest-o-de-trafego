@@ -86,8 +86,11 @@ export function DebtView() {
     }
 
     try {
+      // Destructure to remove relations and metadata that shouldn't be sent back to Supabase
+      const { drivers, trucks, created_at, ...cleanDebt } = debt;
+      
       await dbService.updateDebt(debt.id, {
-        ...debt,
+        ...cleanDebt,
         installments_paid: nextPaid,
         due_date: isPaid ? debt.due_date : nextDate.toISOString().split('T')[0],
         status: isPaid ? 'paid' : 'pending'
@@ -95,6 +98,7 @@ export function DebtView() {
       showToast(isPaid ? 'Dívida quitada!' : 'Parcela confirmada!', 'success');
       refresh();
     } catch (error: any) {
+      console.error('Erro ao atualizar parcela:', error);
       showToast('Erro ao atualizar parcela', 'error');
     }
   };
