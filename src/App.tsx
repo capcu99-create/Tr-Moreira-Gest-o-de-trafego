@@ -127,7 +127,7 @@ export default function App() {
     <ToastProvider>
       <div className="min-h-screen bg-brand-bg flex flex-col md:flex-row overflow-hidden font-sans text-brand-text">
         {/* Sidebar (Desktop) */}
-        <div className="hidden md:block">
+        <div className="hidden md:block w-[260px] shrink-0 h-screen sticky top-0">
           <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
 
@@ -147,10 +147,10 @@ export default function App() {
                 animate={{ x: 0 }}
                 exit={{ x: -280 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="fixed inset-y-0 left-0 w-[280px] bg-brand-dark z-50 md:hidden shadow-2xl"
+                className="fixed inset-y-0 left-0 w-[280px] bg-brand-dark z-50 md:hidden shadow-2xl flex flex-col"
               >
-                <div className="p-4 flex justify-end">
-                  <button onClick={() => setIsMobileMenuOpen(false)} className="text-white/60 hover:text-white">
+                <div className="absolute top-4 right-4 z-10">
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="text-white/60 hover:text-white p-2">
                     <X size={24} />
                   </button>
                 </div>
