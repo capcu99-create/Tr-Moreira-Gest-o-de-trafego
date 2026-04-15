@@ -224,7 +224,7 @@ export function DebtView() {
                         {debt.type === 'pagar' ? 'A Pagar' : 'A Receber'}
                       </p>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <button 
                         onClick={() => { setEditingDebt(debt); setIsModalOpen(true); }}
                         className="p-2 text-brand-text-muted hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all"
