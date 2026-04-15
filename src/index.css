@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  
+  --color-brand-primary: #F97316; /* Orange */
+  --color-brand-dark: #000000;    /* Black */
+  
+  /* Light Theme Variables */
+  --color-brand-bg: var(--bg-color, #F5F5F5);
+  --color-brand-panel: var(--panel-color, #FFFFFF);
+  --color-brand-border: var(--border-color, #E5E5E5);
+  --color-brand-text: var(--text-color, #000000);
+  --color-brand-text-muted: var(--text-muted-color, #666666);
+  --color-brand-text-nav: var(--text-nav-color, #999999);
+}
+
+:root {
+  --bg-color: #F5F5F5;
+  --panel-color: #FFFFFF;
+  --border-color: #E5E5E5;
+  --text-color: #000000;
+  --text-muted-color: #666666;
+  --text-nav-color: #999999;
+  --header-bg: #FFFFFF;
+  --table-header-bg: #F9F9F9;
+}
+
+.dark {
+  --bg-color: #000000;
+  --panel-color: #111111;
+  --border-color: #222222;
+  --text-color: #FFFFFF;
+  --text-muted-color: #A1A1AA;
+  --text-nav-color: #71717A;
+  --header-bg: #111111;
+  --table-header-bg: #000000;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-bg text-brand-text font-sans transition-colors duration-200;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-brand-panel rounded-xl border border-brand-border shadow-sm overflow-hidden;
+  }
+  
+  .panel-header {
+    @apply px-5 py-4 border-b border-brand-border font-semibold text-sm bg-[var(--table-header-bg)];
+  }
+}
