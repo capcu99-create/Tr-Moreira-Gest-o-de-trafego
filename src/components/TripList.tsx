@@ -211,7 +211,7 @@ export function TripList({ type }: TripListProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                      <div className="flex items-center justify-end md:opacity-0 md:group-hover:opacity-100 transition-opacity gap-1">
                         <button 
                           onClick={() => { setEditingTrip(trip); setIsModalOpen(true); }}
                           className="p-2 text-brand-text-muted hover:text-brand-primary hover:bg-white rounded-lg transition-all"
