@@ -335,7 +335,7 @@ export function DebtView() {
 
           <div>
             <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Tipo</label>
-            <select name="type" defaultValue={editingDebt?.type || 'pagar'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+            <select name="type" defaultValue={editingDebt?.type || 'pagar'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
               <option value="pagar">A Pagar (Dívida)</option>
               <option value="receber">A Receber (Crédito)</option>
             </select>
