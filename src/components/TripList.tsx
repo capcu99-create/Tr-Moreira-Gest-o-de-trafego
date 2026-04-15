@@ -302,21 +302,21 @@ export function TripList({ type }: TripListProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Motorista</label>
-              <select name="driver_id" defaultValue={editingTrip?.driver_id} required className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+              <select name="driver_id" defaultValue={editingTrip?.driver_id} required className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                 <option value="">Selecionar motorista...</option>
                 {drivers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Cavalo (Placa)</label>
-              <select name="truck_id" defaultValue={editingTrip?.truck_id} required className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+              <select name="truck_id" defaultValue={editingTrip?.truck_id} required className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                 <option value="">Selecionar cavalo...</option>
                 {trucks.filter(t => t.type === 'cavalo').map(t => <option key={t.id} value={t.id}>{t.plate} - {t.model}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Carreta (Placa)</label>
-              <select name="trailer_id" defaultValue={editingTrip?.trailer_id} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+              <select name="trailer_id" defaultValue={editingTrip?.trailer_id} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                 <option value="">Selecionar carreta...</option>
                 {trucks.filter(t => t.type === 'carreta').map(t => <option key={t.id} value={t.id}>{t.plate} - {t.trailer_category === 'frigorifica' ? 'Frigorífica' : 'Normal'}</option>)}
               </select>
@@ -349,7 +349,7 @@ export function TripList({ type }: TripListProps) {
             </div>
             <div className="col-span-2 md:col-span-1">
               <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Status</label>
-              <select name="status" defaultValue={editingTrip?.status || 'pending'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary bg-white text-sm">
+              <select name="status" defaultValue={editingTrip?.status || 'pending'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                 <option value="pending">Pendente</option>
                 <option value="completed">Entregue</option>
                 <option value="paid">Pago</option>
