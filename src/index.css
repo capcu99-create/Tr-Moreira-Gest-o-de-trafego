@@ -41,6 +41,15 @@
   body {
     @apply bg-brand-bg text-brand-text font-sans transition-colors duration-200;
   }
+
+  input, select, textarea {
+    @apply bg-brand-panel text-brand-text border-brand-border;
+  }
+
+  /* Fix for browser-specific date/time input icons in dark mode */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    @apply dark:invert;
+  }
 }
 
 @layer components {
