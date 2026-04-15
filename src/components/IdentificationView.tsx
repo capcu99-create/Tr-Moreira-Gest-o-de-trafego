@@ -72,7 +72,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
           }
         });
 
-        if (editingItem) {
+        if (editingItem?.id) {
           await dbService.updateDriver(editingItem.id, data);
           showToast('Motorista atualizado!', 'success');
         } else {
@@ -98,7 +98,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
           }
         });
 
-        if (editingItem) {
+        if (editingItem?.id) {
           await dbService.updateTruck(editingItem.id, data);
           showToast('Veículo atualizado!', 'success');
         } else {
