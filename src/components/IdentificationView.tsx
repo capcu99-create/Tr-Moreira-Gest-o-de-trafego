@@ -174,7 +174,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
               item.type === 'cavalo' ? <TruckIcon size={24} /> : <Box size={24} />
             )}
           </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <button 
               onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
               className="p-2 text-brand-text-muted hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all"
