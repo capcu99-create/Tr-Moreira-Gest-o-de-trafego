@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDrivers, useTrucks } from '../lib/hooks';
 import { dbService } from '../lib/dbService';
 import { useToast } from './ui/Toast';
-import { Truck, Users, Link, Unlink, AlertCircle, Box, UserCircle } from 'lucide-react';
+import { Truck, Users, Link, Unlink, AlertCircle, Box, UserCircle, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 
@@ -27,6 +27,20 @@ export function FleetPuzzleView() {
     } catch (error: any) {
       console.error('Erro ao atualizar frota:', error);
       showToast(error.message || 'Erro ao atualizar frota', 'error');
+    } finally {
+      setIsUpdating(null);
+    }
+  };
+
+  const handleUpdateInvoice = async (driverId: string, invoice: string) => {
+    setIsUpdating(driverId);
+    try {
+      await dbService.updateDriver(driverId, { current_invoice: invoice });
+      showToast('Nota Fiscal atualizada!', 'success');
+      refreshDrivers();
+    } catch (error: any) {
+      console.error('Erro ao atualizar NF:', error);
+      showToast(error.message || 'Erro ao atualizar NF', 'error');
     } finally {
       setIsUpdating(null);
     }
@@ -133,6 +147,11 @@ export function FleetPuzzleView() {
                         <p className="text-xs font-bold text-brand-text truncate">
                           {currentTrailer ? currentTrailer.plate : 'Vazio'}
                         </p>
+                        {driver.current_invoice && (
+                          <p className="text-[10px] font-bold text-emerald-600 flex items-center gap-1 mt-0.5">
+                            <FileText size={10} /> {driver.current_invoice}
+                          </p>
+                        )}
                       </div>
 
                       {currentTrailer && (
@@ -147,12 +166,12 @@ export function FleetPuzzleView() {
                   </div>
 
                   {/* Actions */}
-                  <div className="w-full sm:w-auto">
+                  <div className="w-full sm:w-auto flex flex-col gap-2">
                     <select 
                       disabled={isUpdating === driver.id}
                       onChange={(e) => handleAssignTrailer(driver.id, e.target.value)}
                       value={driver.current_trailer_id || ''}
-                      className="w-full sm:w-40 px-3 py-2 bg-white border border-brand-border rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                      className="w-full sm:w-48 px-3 py-2 border border-brand-border rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-brand-primary"
                     >
                       <option value="">Trocar Carreta...</option>
                       {availableTrailers.map(t => (
@@ -161,6 +180,22 @@ export function FleetPuzzleView() {
                         </option>
                       ))}
                     </select>
+                    
+                    <div className="relative">
+                      <FileText size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-muted" />
+                      <input 
+                        type="text"
+                        placeholder="Nota Fiscal..."
+                        defaultValue={driver.current_invoice || ''}
+                        disabled={isUpdating === driver.id}
+                        onBlur={(e) => {
+                          if (e.target.value !== (driver.current_invoice || '')) {
+                            handleUpdateInvoice(driver.id, e.target.value);
+                          }
+                        }}
+                        className="w-full sm:w-48 pl-8 pr-3 py-2 border border-brand-border rounded-lg text-xs font-bold outline-none focus:ring-2 focus:ring-brand-primary"
+                      />
+                    </div>
                   </div>
                 </motion.div>
               );
