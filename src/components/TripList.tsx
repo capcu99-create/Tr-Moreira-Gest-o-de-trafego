@@ -11,7 +11,8 @@ import {
   Trash2,
   Edit2,
   ArrowRight,
-  ChevronRight
+  ChevronRight,
+  Calculator
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { formatCurrency, formatDate, cn } from '../lib/utils';
@@ -19,6 +20,7 @@ import { dbService } from '../lib/dbService';
 import { Trip, Driver, Truck as TruckType } from '../types';
 import { Modal } from './ui/Modal';
 import { ConfirmModal } from './ui/ConfirmModal';
+import { TripExpenseModal } from './TripExpenseModal';
 import { useTrips, useDrivers, useTrucks } from '../lib/hooks';
 import { useToast } from './ui/Toast';
 
@@ -37,6 +39,15 @@ export function TripList({ type }: TripListProps) {
   const [editingTrip, setEditingTrip] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [expenseTrip, setExpenseTrip] = useState<Trip | null>(null);
+
+  // Sincronizar o frete selecionado para gastos caso os dados mudem (ex: após editar KM)
+  React.useEffect(() => {
+    if (expenseTrip) {
+      const updated = trips.find(t => t.id === expenseTrip.id);
+      if (updated) setExpenseTrip(updated as Trip);
+    }
+  }, [trips]);
 
   const handleSaveTrip = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -51,6 +62,9 @@ export function TripList({ type }: TripListProps) {
       cte: formData.get('cte') as string,
       loading_date: formData.get('loading_date') as string,
       cte_date: (formData.get('cte_date') as string) || null,
+      delivery_date: (formData.get('delivery_date') as string) || null,
+      km_initial: Number(formData.get('km_initial')) || 0,
+      km_final: Number(formData.get('km_final')) || 0,
       freight_value: Number(formData.get('freight_value')),
       advance_value: Number(formData.get('advance_value')),
       status: formData.get('status') as any,
@@ -213,6 +227,13 @@ export function TripList({ type }: TripListProps) {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end md:opacity-0 md:group-hover:opacity-100 transition-opacity gap-1">
                         <button 
+                          onClick={() => setExpenseTrip(trip as any)}
+                          className="p-2 text-brand-text-muted hover:text-emerald-500 hover:bg-white rounded-lg transition-all"
+                          title="Gastos da Viagem"
+                        >
+                          <Calculator size={14} />
+                        </button>
+                        <button 
                           onClick={() => { setEditingTrip(trip); setIsModalOpen(true); }}
                           className="p-2 text-brand-text-muted hover:text-brand-primary hover:bg-white rounded-lg transition-all"
                         >
@@ -274,6 +295,12 @@ export function TripList({ type }: TripListProps) {
                 <p className="text-lg font-bold text-gray-900">{formatCurrency(trip.freight_value)}</p>
               </div>
               <div className="flex gap-2">
+                <button 
+                  onClick={() => setExpenseTrip(trip as any)}
+                  className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"
+                >
+                  <Calculator size={16} />
+                </button>
                 <button 
                   onClick={() => { setEditingTrip(trip); setIsModalOpen(true); }}
                   className="p-2 bg-gray-50 text-brand-text-muted rounded-lg"
@@ -347,6 +374,18 @@ export function TripList({ type }: TripListProps) {
               <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Data Emissão CTE</label>
               <input type="date" name="cte_date" defaultValue={editingTrip?.cte_date} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm" />
             </div>
+            <div>
+              <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Data Entrega</label>
+              <input type="date" name="delivery_date" defaultValue={editingTrip?.delivery_date} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">KM Inicial</label>
+              <input type="number" name="km_initial" defaultValue={editingTrip?.km_initial || 0} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm" placeholder="0" />
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">KM Final</label>
+              <input type="number" name="km_final" defaultValue={editingTrip?.km_final || 0} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm" placeholder="0" />
+            </div>
             <div className="col-span-2 md:col-span-1">
               <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Status</label>
               <select name="status" defaultValue={editingTrip?.status || 'pending'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
@@ -389,6 +428,15 @@ export function TripList({ type }: TripListProps) {
         message="Tem certeza que deseja excluir este frete? Esta ação não pode ser desfeita."
         variant="danger"
       />
+
+      {expenseTrip && (
+        <TripExpenseModal 
+          isOpen={!!expenseTrip}
+          onClose={() => setExpenseTrip(null)}
+          trip={expenseTrip}
+          onUpdateTrip={refresh}
+        />
+      )}
     </div>
   );
 }
