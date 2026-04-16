@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
-import { Driver, Truck, Trip, Expense, Debt } from '../types';
+import { Driver, Truck, Trip, TripExpense, Debt } from '../types';
 
 const ensureConfigured = () => {
   if (!isSupabaseConfigured) {
@@ -113,6 +113,25 @@ export const dbService = {
   async deleteDebt(id: string) {
     ensureConfigured();
     const { error } = await supabase.from('debts').delete().eq('id', id);
+    if (error) throw error;
+  },
+
+  // Trip Expenses
+  async getTripExpenses(tripId: string) {
+    ensureConfigured();
+    const { data, error } = await supabase.from('trip_expenses').select('*').eq('trip_id', tripId).order('date');
+    if (error) throw error;
+    return data as TripExpense[];
+  },
+  async addTripExpense(expense: Omit<TripExpense, 'id'>) {
+    ensureConfigured();
+    const { data, error } = await supabase.from('trip_expenses').insert(expense).select().single();
+    if (error) throw error;
+    return data as TripExpense;
+  },
+  async deleteTripExpense(id: string) {
+    ensureConfigured();
+    const { error } = await supabase.from('trip_expenses').delete().eq('id', id);
     if (error) throw error;
   }
 };
