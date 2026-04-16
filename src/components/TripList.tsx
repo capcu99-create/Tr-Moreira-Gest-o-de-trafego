@@ -20,7 +20,7 @@ import { dbService } from '../lib/dbService';
 import { Trip, Driver, Truck as TruckType } from '../types';
 import { Modal } from './ui/Modal';
 import { ConfirmModal } from './ui/ConfirmModal';
-import { TripExpenseModal } from './TripExpenseModal';
+import { TripExpenseModal } from './TripExpenseModal.tsx';
 import { useTrips, useDrivers, useTrucks } from '../lib/hooks';
 import { useToast } from './ui/Toast';
 
