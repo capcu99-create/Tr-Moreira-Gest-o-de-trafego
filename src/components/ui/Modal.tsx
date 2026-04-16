@@ -7,9 +7,10 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  maxWidth?: string;
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }: ModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -25,7 +26,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-brand-panel w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
+            className={`relative bg-brand-panel w-full ${maxWidth} rounded-2xl shadow-2xl overflow-hidden`}
           >
             <div className="px-6 py-4 border-b border-brand-border flex items-center justify-between bg-[var(--table-header-bg)]">
               <h3 className="font-bold text-brand-text">{title}</h3>
