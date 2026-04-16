@@ -14,7 +14,8 @@ import {
   Box,
   Home,
   Map as MapIcon,
-  Warehouse
+  Warehouse,
+  FileText
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { dbService } from '../lib/dbService';
@@ -62,6 +63,8 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
           avatar_url: (formData.get('avatar_url') as string) || null,
           work_status: formData.get('work_status') as 'home' | 'road',
           truck_id: (formData.get('truck_id') as string) || null,
+          current_trailer_id: (formData.get('current_trailer_id') as string) || null,
+          current_invoice: (formData.get('current_invoice') as string) || null,
           status: 'active' as const
         };
 
@@ -195,9 +198,19 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
             {activeTab === 'drivers' ? item.name : item.plate}
           </h4>
           {activeTab === 'drivers' && (
-            <p className="text-[10px] font-bold text-brand-primary uppercase tracking-wider">
-              {trucks.find(t => t.id === item.truck_id)?.plate || 'Sem Cavalo Fixo'}
-            </p>
+            <div className="space-y-1 mt-1">
+              <p className="text-[10px] font-bold text-brand-primary uppercase tracking-wider">
+                🚚 {trucks.find(t => t.id === item.truck_id)?.plate || 'Sem Cavalo Fixo'}
+              </p>
+              <p className="text-[10px] font-bold text-brand-text-muted uppercase tracking-wider">
+                📦 {trucks.find(t => t.id === item.current_trailer_id)?.plate || 'Sem Carreta'}
+              </p>
+              {item.current_invoice && (
+                <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
+                  <FileText size={10} /> NF: {item.current_invoice}
+                </p>
+              )}
+            </div>
           )}
           <div className="flex items-center gap-2">
             <p className="text-sm text-brand-text-muted font-medium">
@@ -479,6 +492,19 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Carreta Atual</label>
+                <select name="current_trailer_id" defaultValue={editingItem?.current_trailer_id} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
+                  <option value="">Nenhuma</option>
+                  {trucks.filter(t => t.type === 'carreta').map(t => (
+                    <option key={t.id} value={t.id}>{t.plate} - {t.trailer_category === 'frigorifica' ? 'Frigorífica' : 'Normal'}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Nota Fiscal em Trânsito</label>
+                <input name="current_invoice" defaultValue={editingItem?.current_invoice} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm" placeholder="Ex: NF 12345" />
+              </div>
             </>
           ) : (
             <>
@@ -591,6 +617,7 @@ CREATE TABLE IF NOT EXISTS drivers (
   work_status TEXT DEFAULT 'home', -- 'home' ou 'road'
   truck_id UUID REFERENCES trucks(id) ON DELETE SET NULL, -- Cavalo Fixo
   current_trailer_id UUID REFERENCES trucks(id) ON DELETE SET NULL, -- Carreta Atual
+  current_invoice TEXT, -- Nota Fiscal Atual
   status TEXT DEFAULT 'active',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -607,13 +634,28 @@ CREATE TABLE IF NOT EXISTS trips (
   cte TEXT,
   loading_date DATE,
   cte_date DATE,
+  delivery_date DATE,
+  km_initial DECIMAL(12,2),
+  km_final DECIMAL(12,2),
   freight_value DECIMAL(12,2),
   advance_value DECIMAL(12,2),
   status TEXT DEFAULT 'pending',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4. CRIAR TABELA DE DÍVIDAS/FINANCEIRO (DEBTS)
+-- 4. CRIAR TABELA DE GASTOS DE VIAGEM (TRIP_EXPENSES)
+CREATE TABLE IF NOT EXISTS trip_expenses (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  trip_id UUID REFERENCES trips(id) ON DELETE CASCADE,
+  type TEXT CHECK (type IN ('fuel', 'diverse', 'advance')),
+  date DATE DEFAULT CURRENT_DATE,
+  description TEXT,
+  value DECIMAL(12,2) NOT NULL,
+  liters DECIMAL(12,2),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 5. CRIAR TABELA DE DÍVIDAS/FINANCEIRO (DEBTS)
 CREATE TABLE IF NOT EXISTS debts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   person_name TEXT NOT NULL,
@@ -647,6 +689,9 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='drivers' AND column_name='work_status') THEN
     ALTER TABLE drivers ADD COLUMN work_status TEXT DEFAULT 'home';
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='drivers' AND column_name='current_invoice') THEN
+    ALTER TABLE drivers ADD COLUMN current_invoice TEXT;
+  END IF;
 
   -- Colunas para trips
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trips' AND column_name='cte_date') THEN
@@ -654,6 +699,15 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trips' AND column_name='trailer_id') THEN
     ALTER TABLE trips ADD COLUMN trailer_id UUID REFERENCES trucks(id) ON DELETE SET NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trips' AND column_name='km_initial') THEN
+    ALTER TABLE trips ADD COLUMN km_initial DECIMAL(12,2);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trips' AND column_name='km_final') THEN
+    ALTER TABLE trips ADD COLUMN km_final DECIMAL(12,2);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trips' AND column_name='delivery_date') THEN
+    ALTER TABLE trips ADD COLUMN delivery_date DATE;
   END IF;
 END $$;`}
             </pre>
