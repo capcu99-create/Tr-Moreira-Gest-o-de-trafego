@@ -15,7 +15,10 @@ import {
   Home,
   Map as MapIcon,
   Warehouse,
-  FileText
+  FileText,
+  Paperclip,
+  Download,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { dbService } from '../lib/dbService';
@@ -44,11 +47,37 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showSetup, setShowSetup] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Sync activeTab with defaultTab when it changes from parent
   React.useEffect(() => {
     setActiveTab(defaultTab);
   }, [defaultTab]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+      const bucket = 'documents';
+      const publicUrl = await dbService.uploadFile(bucket, fileName, file);
+      
+      // Update form value
+      const input = document.getElementsByName(fieldName)[0] as HTMLInputElement;
+      if (input) {
+        input.value = publicUrl;
+        showToast('Documento carregado com sucesso!', 'success');
+      }
+    } catch (error: any) {
+      console.error('Erro detalhado no upload:', error);
+      const errorMessage = error.message || error.error_description || 'Erro desconhecido';
+      showToast(`Erro no upload: ${errorMessage}. Verifique se o bucket "documents" existe e é público no Supabase.`, 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -61,6 +90,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
           name: formData.get('name') as string,
           phone: formData.get('phone') as string,
           avatar_url: (formData.get('avatar_url') as string) || null,
+          cnh_url: (formData.get('cnh_url') as string) || null,
           work_status: formData.get('work_status') as 'home' | 'road',
           truck_id: (formData.get('truck_id') as string) || null,
           current_trailer_id: (formData.get('current_trailer_id') as string) || null,
@@ -91,6 +121,7 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
           location_status: formData.get('location_status') as 'yard' | 'road',
           maintenance_status: formData.get('maintenance_status') as 'ok' | 'needed' || 'ok',
           type: formData.get('type') as 'cavalo' | 'carreta',
+          doc_url: (formData.get('doc_url') as string) || null,
           status: 'available' as const
         };
 
@@ -197,6 +228,34 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
           <h4 className="text-lg font-bold text-brand-text truncate">
             {activeTab === 'drivers' ? item.name : item.plate}
           </h4>
+          
+          <div className="flex flex-wrap gap-2 mt-2">
+            {activeTab === 'drivers' && item.cnh_url && (
+              <a 
+                href={item.cnh_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary/10 text-brand-primary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all shadow-sm"
+              >
+                <FileText size={12} />
+                CNH
+                <Download size={10} />
+              </a>
+            )}
+            {activeTab === 'trucks' && item.doc_url && (
+              <a 
+                href={item.doc_url} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary/10 text-brand-primary rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-brand-primary hover:text-white transition-all shadow-sm"
+              >
+                <FileText size={12} />
+                DOC
+                <Download size={10} />
+              </a>
+            )}
+          </div>
+
           {activeTab === 'drivers' && (
             <div className="space-y-1 mt-1">
               <p className="text-[10px] font-bold text-brand-primary uppercase tracking-wider">
@@ -477,6 +536,31 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
                 <input name="phone" defaultValue={editingItem?.phone} required className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm" placeholder="(00) 00000-0000" />
               </div>
               <div>
+                <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5 flex items-center justify-between">
+                  <span>Documento CNH</span>
+                  {isUploading && <span className="text-brand-primary animate-pulse text-[8px]">Carregando...</span>}
+                </label>
+                <div className="flex gap-2">
+                  <input 
+                    name="cnh_url" 
+                    defaultValue={editingItem?.cnh_url} 
+                    className="flex-1 px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-[10px]" 
+                    placeholder="URL do documento ou use o botão ->" 
+                  />
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      onChange={(e) => handleFileUpload(e, 'cnh_url')} 
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                      accept=".pdf,image/*"
+                    />
+                    <div className="h-full px-4 flex items-center justify-center bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200 transition-colors">
+                      <Paperclip size={18} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
                 <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5">Status de Trabalho</label>
                 <select name="work_status" defaultValue={editingItem?.work_status || 'home'} className="w-full px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-sm">
                   <option value="home">Em Casa / Livre</option>
@@ -527,6 +611,32 @@ export function IdentificationView({ defaultTab = 'drivers' }: IdentificationVie
                     <option value="cavalo">Cavalo</option>
                     <option value="carreta">Carreta</option>
                   </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-brand-text-muted uppercase tracking-widest mb-1.5 flex items-center justify-between">
+                  <span>Documento do Veículo</span>
+                  {isUploading && <span className="text-brand-primary animate-pulse text-[8px]">Carregando...</span>}
+                </label>
+                <div className="flex gap-2">
+                  <input 
+                    name="doc_url" 
+                    defaultValue={editingItem?.doc_url} 
+                    className="flex-1 px-4 py-2.5 border border-brand-border rounded-xl outline-none focus:ring-2 focus:ring-brand-primary text-[10px]" 
+                    placeholder="URL do documento ou use o botão ->" 
+                  />
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      onChange={(e) => handleFileUpload(e, 'doc_url')} 
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                      accept=".pdf,image/*"
+                    />
+                    <div className="h-full px-4 flex items-center justify-center bg-gray-100 rounded-xl text-gray-600 hover:bg-gray-200 transition-colors">
+                      <Paperclip size={18} />
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -605,6 +715,7 @@ CREATE TABLE IF NOT EXISTS trucks (
   trailer_category TEXT, -- 'frigorifica' ou 'normal'
   location_status TEXT DEFAULT 'yard', -- 'yard' ou 'road'
   status TEXT DEFAULT 'available',
+  doc_url TEXT, -- Documento do veículo
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -614,6 +725,7 @@ CREATE TABLE IF NOT EXISTS drivers (
   name TEXT NOT NULL,
   phone TEXT,
   avatar_url TEXT,
+  cnh_url TEXT, -- Documento CNH
   work_status TEXT DEFAULT 'home', -- 'home' ou 'road'
   truck_id UUID REFERENCES trucks(id) ON DELETE SET NULL, -- Cavalo Fixo
   current_trailer_id UUID REFERENCES trucks(id) ON DELETE SET NULL, -- Carreta Atual
@@ -681,6 +793,9 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trucks' AND column_name='maintenance_status') THEN
     ALTER TABLE trucks ADD COLUMN maintenance_status TEXT DEFAULT 'ok';
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='trucks' AND column_name='doc_url') THEN
+    ALTER TABLE trucks ADD COLUMN doc_url TEXT;
+  END IF;
 
   -- Colunas para drivers
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='drivers' AND column_name='avatar_url') THEN
@@ -691,6 +806,9 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='drivers' AND column_name='current_invoice') THEN
     ALTER TABLE drivers ADD COLUMN current_invoice TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='drivers' AND column_name='cnh_url') THEN
+    ALTER TABLE drivers ADD COLUMN cnh_url TEXT;
   END IF;
 
   -- Colunas para trips
