@@ -6,7 +6,9 @@ export type Driver = {
   work_status?: 'home' | 'road';
   truck_id?: string; // Fixed Cavalo
   current_trailer_id?: string; // Dynamic Carreta
+  current_invoice?: string; // Shared NF for the trip
   avatar_url?: string;
+  cnh_url?: string; // URL for CNH document
 };
 
 export type Truck = {
@@ -17,6 +19,7 @@ export type Truck = {
   trailer_category?: 'frigorifica' | 'normal';
   location_status?: 'yard' | 'road';
   maintenance_status?: 'ok' | 'needed';
+  doc_url?: string; // URL for truck document
 };
 
 export type Trip = {
@@ -29,21 +32,26 @@ export type Trip = {
   cte: string;
   loading_date: string;
   cte_date?: string | null;
+  delivery_date?: string | null;
+  km_initial?: number;
+  km_final?: number;
   freight_value: number;
   advance_value: number;
   received_date?: string;
   status: 'pending' | 'completed' | 'paid';
   type: 'ida' | 'volta';
+  drivers?: { name: string };
+  trucks?: { plate: string; model?: string };
 };
 
-export type Expense = {
+export type TripExpense = {
   id: string;
-  trip_id?: string;
-  driver_id?: string;
-  type: 'fuel' | 'maintenance' | 'food' | 'other';
+  trip_id: string;
+  type: 'fuel' | 'diverse' | 'advance';
   date: string;
-  value: number;
   description: string;
+  value: number;
+  liters?: number;
 };
 
 export type Debt = {
