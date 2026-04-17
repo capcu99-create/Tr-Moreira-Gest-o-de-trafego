@@ -116,6 +116,25 @@ export const dbService = {
     if (error) throw error;
   },
 
+  // Storage / Files
+  async uploadFile(bucket: string, path: string, file: File) {
+    ensureConfigured();
+    const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
+      upsert: true
+    });
+    if (error) throw error;
+    
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path);
+    return publicUrl;
+  },
+
+  async deleteFile(bucket: string, path: string) {
+    ensureConfigured();
+    const { error } = await supabase.storage.from(bucket).remove([path]);
+    if (error) throw error;
+  },
+
   // Trip Expenses
   async getTripExpenses(tripId: string) {
     ensureConfigured();
